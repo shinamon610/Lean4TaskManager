@@ -1,6 +1,5 @@
 name = "Lean4TaskManager"
 version = "0.1.0"
-defaultTargets = ["lean4taskmanager"]
 
 [[lean_lib]]
 name = "Lean4TaskManager"
