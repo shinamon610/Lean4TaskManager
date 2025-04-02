@@ -4,7 +4,3 @@ defaultTargets = ["lean4taskmanager"]
 
 [[lean_lib]]
 name = "Lean4TaskManager"
-
-[[lean_exe]]
-name = "lean4taskmanager"
-root = "Main"
