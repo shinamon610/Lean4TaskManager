@@ -3,3 +3,9 @@ version = "0.1.0"
 
 [[lean_lib]]
 name = "Lean4TaskManager"
+
+# A Git dependency
+[[require]]
+name = "Tree"
+git = "https://github.com/shinamon610/Tree"
+rev = "main"
