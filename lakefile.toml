@@ -1,0 +1,10 @@
+name = "Lean4TaskManager"
+version = "0.1.0"
+defaultTargets = ["lean4taskmanager"]
+
+[[lean_lib]]
+name = "Lean4TaskManager"
+
+[[lean_exe]]
+name = "lean4taskmanager"
+root = "Main"
