@@ -1,6 +1,6 @@
 import Std
 import Lean.Util.FoldConsts
-import Tree.Tree
+import Lean4MyLib.Tree
 
 open Std
 open Std.Time

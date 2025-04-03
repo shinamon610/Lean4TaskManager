@@ -6,6 +6,6 @@ name = "Lean4TaskManager"
 
 # A Git dependency
 [[require]]
-name = "Tree"
-git = "https://github.com/shinamon610/Tree"
+name = "Lean4MyLib"
+git = "https://github.com/shinamon610/Lean4MyLib"
 rev = "main"
