@@ -14,13 +14,6 @@ structure Operator where
   name:String
 deriving Repr,Inhabited,BEq,Hashable
 
-structure Progress where
-  current:Float
-  all:Float
-deriving Repr,Inhabited,BEq
-instance :Hashable Progress where
-  hash progress:=hash (progress.current+progress.all).toInt32
-
 structure TaskBase (Status Tag:Type)  where
   name:String
   status:Status
@@ -28,7 +21,6 @@ structure TaskBase (Status Tag:Type)  where
   tags:List Tag
   «開始予定日»:Option ZonedDateTime
   «終了予定日»:Option ZonedDateTime
-  progress:Option Progress
 deriving Inhabited
 
 instance :Repr (TaskBase Status Tag) where
@@ -45,8 +37,8 @@ instance : ToString (TaskBase Status Tag) where
 
 def exec (stt:StateM S A) (init:S):S:= (stt.run init).snd
 
-def TaskBase.new(name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Option Status:= none) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none)  (progress:Option Progress:=none)[Inhabited Status]:TaskBase Status Tag :=
-  {name,status:=(status.getD default), assign:=operator,tags,«開始予定日»,«終了予定日»,progress}
+def TaskBase.new(name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Option Status:= none) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none) [Inhabited Status]:TaskBase Status Tag :=
+  {name,status:=(status.getD default), assign:=operator,tags,«開始予定日»,«終了予定日»}
 
 def toList {A:Type}(root:Tree A): List A:=
   match root with
