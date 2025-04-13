@@ -14,11 +14,15 @@ structure Operator where
   name:String
 deriving Repr,Inhabited,BEq,Hashable
 
+inductive KnowledgeLink
+| Link : Option String->KnowledgeLink
+
 structure TaskBase (Status Tag:Type)  where
   name:String
   status:Status
   assign:Option Operator
   tags:List Tag
+  links: List KnowledgeLink
   «開始予定日»:Option ZonedDateTime
   «終了予定日»:Option ZonedDateTime
 deriving Inhabited
@@ -37,8 +41,8 @@ instance : ToString (TaskBase Status Tag) where
 
 def exec (stt:StateM S A) (init:S):S:= (stt.run init).snd
 
-def TaskBase.new(name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Option Status:= none) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none) [Inhabited Status]:TaskBase Status Tag :=
-  {name,status:=(status.getD default), assign:=operator,tags,«開始予定日»,«終了予定日»}
+def TaskBase.new(name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Option Status:= none) (links:List KnowledgeLink:=[]) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none) [Inhabited Status]:TaskBase Status Tag :=
+  {name,status:=(status.getD default), assign:=operator,tags,links, «開始予定日»,«終了予定日»}
 
 def toList {A:Type}(root:Tree A): List A:=
   match root with
