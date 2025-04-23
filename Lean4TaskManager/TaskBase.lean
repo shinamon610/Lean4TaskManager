@@ -74,3 +74,7 @@ def root_daily (now:ZonedDateTime) [Inhabited Status]:DAG (DailyTask Status Tag)
 def show_task (allTasks:DAG (TaskBase Status Tag))(condition:(TaskBase Status Tag)->Bool) [Inhabited Status]:DAG (TaskBase Status Tag):=
   let res:=find condition allTasks
   res.get!
+
+def indent (n : Nat) (s : String) : String :=
+  let list := List.replicate n " "
+  (list.foldl (fun acc x=> x ++ acc) "⊢ ")++s
