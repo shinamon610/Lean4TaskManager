@@ -48,11 +48,14 @@ def toList {A:Type}(root:DAG A): List A:=
   match root with
   | .Node parent children => parent::(children.flatMap toList)
 
-def isAllChildrenDone [Doneable Status]: DAG (TaskBase Status Tag) → Bool
+def isAllChildrenDone [Doneable Status]: DAG (TaskBase Status Tag) -> Bool
+  | .Node _ children => children.all (fun child => Doneable.isDone (top child).status)
+
+def isAllChildrenValid [Doneable Status]: DAG (TaskBase Status Tag) → Bool
   | .Node task children =>
     let allChildrenDone :=
       children.all (fun child => Doneable.isDone (top child).status)
-    let childrenValid := children.map isAllChildrenDone |>.all id --ここを単純にallにするとterminationが証明できない
+    let childrenValid := children.map isAllChildrenValid |>.all id --ここを単純にallにするとterminationが証明できない
     if Doneable.isDone task.status then
       allChildrenDone && childrenValid
     else
