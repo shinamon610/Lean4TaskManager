@@ -1,6 +1,7 @@
 import Std
 import Lean.Util.FoldConsts
 import Lean4MyLib.DAG
+import Lean4MyLib.MyDate
 
 open Std
 open Std.Time
@@ -74,3 +75,19 @@ def root_daily (now:ZonedDateTime) [Inhabited Status]:DAG (DailyTask Status Tag)
 def show_task (allTasks:DAG (TaskBase Status Tag))(condition:(TaskBase Status Tag)->Bool) [Inhabited Status]:DAG (TaskBase Status Tag):=
   let res:=find condition allTasks
   res.get!
+
+def «今日かそれ以前に開始» (task:TaskBase S Tag) :IO Bool := do
+  let now <- now
+  return (task.«開始予定日» <&> fun date => decide (date <= now)).getD false
+
+def «n日後に開始» (task:TaskBase S Tag) (n:Day.Offset) :IO Bool := do
+  let now <- now
+  return (task.«開始予定日» <&> fun date => decide (date == (now.addDays n))).getD false
+
+def «今日かそれ以前に終了» (task:TaskBase S Tag) :IO Bool := do
+  let now <- now
+  return (task.«終了予定日» <&> fun date => decide (date <= now)).getD false
+
+def «n日後に終了» (task:TaskBase S Tag) (n:Day.Offset) :IO Bool := do
+  let now <- now
+  return (task.«終了予定日» <&> fun date => decide (date == (now.addDays n))).getD false
