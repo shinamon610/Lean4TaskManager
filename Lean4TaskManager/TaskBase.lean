@@ -1,11 +1,11 @@
 import Std
 import Lean.Util.FoldConsts
-import Lean4MyLib.DAG
+import Lean4MyLib.Tree
 import Lean4MyLib.MyDate
 
 open Std
 open Std.Time
-open DAG
+open Tree
 namespace TaskBase
 
 class Doneable (A:Type) where
@@ -43,14 +43,14 @@ instance : ToString (TaskBase Status Tag) where
 def TaskBase.new(name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Option Status:= none) (links:List KnowledgeLink:=[]) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none) [Inhabited Status]:TaskBase Status Tag :=
   {name,status:=(status.getD default), assign:=operator,tags,links, «開始予定日»,«終了予定日»}
 
-def toList {A:Type}(root:DAG A): List A:=
+def toList {A:Type}(root:Tree A): List A:=
   match root with
   | .Node parent children => parent::(children.flatMap toList)
 
-def isAllChildrenDone [Doneable Status]: DAG (TaskBase Status Tag) -> Bool
+def isAllChildrenDone [Doneable Status]: Tree (TaskBase Status Tag) -> Bool
   | .Node _ children => children.all (fun child => Doneable.isDone (top child).status)
 
-def isAllChildrenValid [Doneable Status]: DAG (TaskBase Status Tag) → Bool
+def isAllChildrenValid [Doneable Status]: Tree (TaskBase Status Tag) → Bool
   | .Node task children =>
     let allChildrenDone :=
       children.all (fun child => Doneable.isDone (top child).status)
@@ -60,19 +60,19 @@ def isAllChildrenValid [Doneable Status]: DAG (TaskBase Status Tag) → Bool
     else
       childrenValid
 
-def root [Inhabited Status]:DAG (TaskBase Status Tag) :=DAG.Node (.new "root" []) []
+def root [Inhabited Status]:Tree (TaskBase Status Tag) :=Tree.Node (.new "root" []) []
 
 structure DailyTask (Status Tag:Type) where
-  tt:DAG (TaskBase Status Tag)
+  tt:Tree (TaskBase Status Tag)
   «最後に完了した日»:ZonedDateTime
 
 instance : ToString (DailyTask Status Tag) where
   toString daily :=
     s! "{daily.tt}"
 
-def root_daily (now:ZonedDateTime) [Inhabited Status]:DAG (DailyTask Status Tag) :=DAG.Node {tt:= root, «最後に完了した日»:= now } []
+def root_daily (now:ZonedDateTime) [Inhabited Status]:Tree (DailyTask Status Tag) :=Tree.Node {tt:= root, «最後に完了した日»:= now } []
 
-def show_task (allTasks:DAG (TaskBase Status Tag))(condition:(TaskBase Status Tag)->Bool) [Inhabited Status]:DAG (TaskBase Status Tag):=
+def show_task (allTasks:Tree (TaskBase Status Tag))(condition:(TaskBase Status Tag)->Bool) [Inhabited Status]:Tree (TaskBase Status Tag):=
   let res:=find condition allTasks
   res.get!
 
