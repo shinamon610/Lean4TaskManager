@@ -12,7 +12,7 @@ class Doneable (A:Type) where
 
 structure Operator where
   name:String
-deriving Repr,Inhabited,BEq,Hashable
+deriving Repr,Inhabited,BEq,Hashable,ToJson
 
 inductive KnowledgeLink
 | Link : Option String->KnowledgeLink
@@ -29,6 +29,18 @@ structure TaskBase (Status Tag:Type)  where
   result:String
 
 deriving Inhabited
+
+instance [ToJson Status][ToJson Tag]: ToJson (TaskBase Status Tag) where
+  toJson t:=
+    Json.mkObj [
+      ("name", toJson t.name),
+      ("status", toJson t.status),
+      ("assign", toJson t.assign),
+      ("tags", toJson t.tags),
+      ("開始予定日", toJson t.«開始予定日»),
+      ("終了予定日", toJson t.«終了予定日»),
+    ]
+
 
 instance :Repr (TaskBase  Status Tag) where
   reprPrec tb _ := tb.name
