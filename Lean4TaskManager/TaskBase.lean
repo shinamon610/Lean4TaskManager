@@ -53,7 +53,7 @@ def inner_isAllChildrenValid [Doneable Status] (dag:DAG (TaskBase Status Tag)) (
       (!hasTarget || !Doneable.isDone (sdag.label fin).status)
       )
 
-def isAllChildronValidDAG [Doneable Status] (dag:DAG (TaskBase Status Tag)):Bool :=
+def isAllChildrenValidDAG [Doneable Status] (dag:DAG (TaskBase Status Tag)):Bool :=
   (List.finRange dag.1).all (fun fin=>inner_isAllChildrenValid dag fin)
 
 def printDoneLog [Doneable Status][ToJson (TaskBase Status Tag)](dag:DAG (TaskBase Status Tag)):IO Unit:=do
