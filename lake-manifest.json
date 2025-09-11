@@ -8,7 +8,7 @@
    "rev": "df7d044f3c6426ef0051f17995147af11ccb9355",
    "name": "Lean4MyLib",
    "manifestFile": "lake-manifest.json",
-   "inputRev": "main",
+   "inputRev": "df7d044f3c6426ef0051f17995147af11ccb9355",
    "inherited": false,
    "configFile": "lakefile.toml"},
   {"url": "https://github.com/leanprover-community/mathlib4",

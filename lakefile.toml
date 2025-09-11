@@ -8,4 +8,4 @@ name = "Lean4TaskManager"
 [[require]]
 name = "Lean4MyLib"
 git = "https://github.com/shinamon610/Lean4MyLib"
-rev = "main"
+rev = "df7d044f3c6426ef0051f17995147af11ccb9355"
