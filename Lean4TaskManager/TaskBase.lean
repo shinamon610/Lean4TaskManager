@@ -25,9 +25,12 @@ structure TaskBase (Status Tag:Type)  where
   links: List KnowledgeLink
   «開始予定日»:Option ZonedDateTime
   «終了予定日»:Option ZonedDateTime
+  details:String
+  result:String
+
 deriving Inhabited
 
-instance :Repr (TaskBase Status Tag) where
+instance :Repr (TaskBase  Status Tag) where
   reprPrec tb _ := tb.name
 
 instance :BEq (TaskBase Status Tag) where
@@ -39,8 +42,8 @@ instance :Hashable (TaskBase Status Tag) where
 instance : ToString (TaskBase Status Tag) where
   toString mytask := s! "{mytask.name}"
 
-def TaskBase.new [Inhabited Status](name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Status:= default) (links:List KnowledgeLink:=[]) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none) :TaskBase Status Tag :=
-  {name,status:=status, assign:=operator,tags,links, «開始予定日»,«終了予定日»}
+def TaskBase.new [Inhabited Status](name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Status:= default) (links:List KnowledgeLink:=[]) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none) (details:="") (result:="") :TaskBase Status Tag :=
+  {name,status:=status, assign:=operator,tags,links, «開始予定日»,«終了予定日», details, result}
 
 def inner_isAllChildrenValid [Doneable Status] (dag:DAG (TaskBase Status Tag)) (target:Fin dag.1) : Bool :=
   match dag with
