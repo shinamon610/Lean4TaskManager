@@ -39,7 +39,7 @@ instance :Hashable (TaskBase Status Tag) where
 instance : ToString (TaskBase Status Tag) where
   toString mytask := s! "{mytask.name}"
 
-def new [Inhabited Status](name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Status:= default) (links:List KnowledgeLink:=[]) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none) :TaskBase Status Tag :=
+def TaskBase.new [Inhabited Status](name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Status:= default) (links:List KnowledgeLink:=[]) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none) :TaskBase Status Tag :=
   {name,status:=status, assign:=operator,tags,links, «開始予定日»,«終了予定日»}
 
 def inner_isAllChildrenValid [Doneable Status] (dag:DAG (TaskBase Status Tag)) (target:Fin dag.1) : Bool :=
