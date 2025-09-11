@@ -7,8 +7,6 @@ open Std
 open Std.Time
 open Lean
 
-namespace TaskBase
-
 class Doneable (A:Type) where
   isDone: A->Bool
 
@@ -19,7 +17,7 @@ deriving Repr,Inhabited,BEq,Hashable
 inductive KnowledgeLink
 | Link : Option String->KnowledgeLink
 
-structure Base (Status Tag:Type)  where
+structure TaskBase (Status Tag:Type)  where
   name:String
   status:Status
   assign:Option Operator
@@ -29,22 +27,22 @@ structure Base (Status Tag:Type)  where
   «終了予定日»:Option ZonedDateTime
 deriving Inhabited
 
-instance :Repr (Base Status Tag) where
+instance :Repr (TaskBase Status Tag) where
   reprPrec tb _ := tb.name
 
-instance :BEq (Base Status Tag) where
+instance :BEq (TaskBase Status Tag) where
   beq t1 t2:=t1.name==t2.name
 
-instance :Hashable (Base Status Tag) where
+instance :Hashable (TaskBase Status Tag) where
   hash t:=hash t.name
 
-instance : ToString (Base Status Tag) where
+instance : ToString (TaskBase Status Tag) where
   toString mytask := s! "{mytask.name}"
 
-def new [Inhabited Status](name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Status:= default) (links:List KnowledgeLink:=[]) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none) :Base Status Tag :=
+def new [Inhabited Status](name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Status:= default) (links:List KnowledgeLink:=[]) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none) :TaskBase Status Tag :=
   {name,status:=status, assign:=operator,tags,links, «開始予定日»,«終了予定日»}
 
-def inner_isAllChildrenValid [Doneable Status] (dag:DAG (Base Status Tag)) (target:Fin dag.1) : Bool :=
+def inner_isAllChildrenValid [Doneable Status] (dag:DAG (TaskBase Status Tag)) (target:Fin dag.1) : Bool :=
   match dag with
   | ⟨n, sdag⟩ =>
     if Doneable.isDone (sdag.label target).status
@@ -55,10 +53,10 @@ def inner_isAllChildrenValid [Doneable Status] (dag:DAG (Base Status Tag)) (targ
       (!hasTarget || !Doneable.isDone (sdag.label fin).status)
       )
 
-def isAllChildronValidDAG [Doneable Status] (dag:DAG (Base Status Tag)):Bool :=
+def isAllChildronValidDAG [Doneable Status] (dag:DAG (TaskBase Status Tag)):Bool :=
   (List.finRange dag.1).all (fun fin=>inner_isAllChildrenValid dag fin)
 
-def printDoneLog [Doneable Status][ToJson (Base Status Tag)](dag:DAG (Base Status Tag)):IO Unit:=do
+def printDoneLog [Doneable Status][ToJson (TaskBase Status Tag)](dag:DAG (TaskBase Status Tag)):IO Unit:=do
   let current <- now
   let filename:String := (current.toISO8601String.takeWhile  (fun x=> x != 'T')) ++ ".json"
   let fd := DAGWithFilter.of dag (fun (t, _) => Doneable.isDone t.status)
