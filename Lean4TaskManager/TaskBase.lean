@@ -75,4 +75,4 @@ def printDoneLog [Doneable Status][ToJson (TaskBase Status Tag)](dag:DAG (TaskBa
   let current <- now
   let filename:String := (current.toISO8601String.takeWhile  (fun x=> x != 'T')) ++ ".json"
   let fd := DAGWithFilter.of dag (fun (t, _) => Doneable.isDone t.status)
-  IO.FS.writeFile filename (toJsonByLabel fd).pretty
+  IO.FS.writeFile filename (toJsonByLabel fd.compress).pretty
