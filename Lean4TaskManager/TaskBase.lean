@@ -71,7 +71,7 @@ def inner_isAllChildrenValid [Doneable Status] (dag:DAG (TaskBase Status Tag)) (
 def isAllChildrenValidDAG [Doneable Status] (dag:DAG (TaskBase Status Tag)):Bool :=
   (List.finRange dag.1).all (fun fin=>inner_isAllChildrenValid dag fin)
 
-def printDoneLog [Doneable Status][ToJson (TaskBase Status Tag)](dag:DAG (TaskBase Status Tag)):IO Unit:=do
+def printDoneLog [Doneable Status][ToJson (TaskBase Status Tag)] [Inhabited (TaskBase Status Tag)] (dag:DAG (TaskBase Status Tag)):IO Unit:=do
   let current <- now
   let filename:String := (current.toISO8601String.takeWhile  (fun x=> x != 'T')) ++ ".json"
   let fd := DAGWithFilter.of dag (fun (t, _) => Doneable.isDone t.status)
