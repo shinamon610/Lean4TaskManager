@@ -25,6 +25,7 @@ structure TaskBase (Status Tag:Type)  where
   links: List KnowledgeLink
   «開始予定日»:Option ZonedDateTime
   «終了予定日»:Option ZonedDateTime
+  «終了日»:Option ZonedDateTime
   details:String
   result:String
 
@@ -39,6 +40,8 @@ instance [ToJson Status][ToJson Tag]: ToJson (TaskBase Status Tag) where
       ("tags", toJson t.tags),
       ("開始予定日", toJson t.«開始予定日»),
       ("終了予定日", toJson t.«終了予定日»),
+      ("details", toJson t.details),
+      ("result", toJson t.result),
     ]
 
 
@@ -54,8 +57,8 @@ instance :Hashable (TaskBase Status Tag) where
 instance : ToString (TaskBase Status Tag) where
   toString mytask := s! "{mytask.name}"
 
-def TaskBase.new [Inhabited Status](name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Status:= default) (links:List KnowledgeLink:=[]) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none) (details:="") (result:="") :TaskBase Status Tag :=
-  {name,status:=status, assign:=operator,tags,links, «開始予定日»,«終了予定日», details, result}
+def TaskBase.new [Inhabited Status](name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Status:= default) (links:List KnowledgeLink:=[]) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none) («終了日»:Option ZonedDateTime:=none) (details:="") (result:="") :TaskBase Status Tag :=
+  {name,status:=status, assign:=operator,tags,links, «開始予定日»,«終了予定日», «終了日», details, result}
 
 def inner_isAllChildrenValid [Doneable Status] (dag:DAG (TaskBase Status Tag)) (target:Fin dag.1) : Bool :=
   match dag with
@@ -74,5 +77,8 @@ def isAllChildrenValidDAG [Doneable Status] (dag:DAG (TaskBase Status Tag)):Bool
 def printDoneLog [Doneable Status][ToJson (TaskBase Status Tag)] [Inhabited (TaskBase Status Tag)] (dag:DAG (TaskBase Status Tag)):IO Unit:=do
   let current <- now
   let filename:String := (current.toISO8601String.takeWhile  (fun x=> x != 'T')) ++ ".json"
-  let fd := DAGWithFilter.of dag (fun (t, _) => Doneable.isDone t.status)
+  let fd := DAGWithFilter.of dag (fun (t, _) =>
+    match t.«終了日» with
+    | none=>Doneable.isDone t.status
+    | some d=> (Doneable.isDone t.status && is_same_date current d))
   IO.FS.writeFile filename (toJsonByLabel fd.compress).pretty
