@@ -60,18 +60,18 @@ instance : ToString (TaskBase Status Tag) where
 def TaskBase.new [Inhabited Status](name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Status:= default) (links:List KnowledgeLink:=[]) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none) («終了日»:Option ZonedDateTime:=none) (details:="") (result:="") :TaskBase Status Tag :=
   {name,status:=status, assign:=operator,tags,links, «開始予定日»,«終了予定日», «終了日», details, result}
 
-def inner_isAllChildrenValid [Doneable Status] (dag:PackedDAG (TaskBase Status Tag)) (target:Fin dag.1) : Bool :=
+def inner_isAllChildrenValid [Doneable A] (dag:PackedDAG A) (target:Fin dag.1) : Bool :=
   match dag with
   | ⟨n, sdag⟩ =>
-    if Doneable.isDone (sdag.label target).status
+    if Doneable.isDone (sdag.label target)
     then true
     else (List.finRange n).all (fun fin =>
       let kidsAsFinN : List (Fin n) := (sdag.kids fin).map (DAG.coeChild fin) -- そのままだとtargetと比較できないから"持ち上げる"必要があるらしい。意味不明
       let hasTarget:=kidsAsFinN.contains target
-      (!hasTarget || !Doneable.isDone (sdag.label fin).status)
+      (!hasTarget || !Doneable.isDone (sdag.label fin))
       )
 
-def isAllChildrenValidDAG [Doneable Status] (dag:PackedDAG (TaskBase Status Tag)):Bool :=
+def isAllChildrenValidDAG [Doneable A] (dag:PackedDAG A):Bool :=
   (List.finRange dag.1).all (fun fin=>inner_isAllChildrenValid dag fin)
 
 def printDoneLog [Doneable Status][ToJson (TaskBase Status Tag)] [Inhabited (TaskBase Status Tag)] (dag:PackedDAG (TaskBase Status Tag)):IO Unit:=do
