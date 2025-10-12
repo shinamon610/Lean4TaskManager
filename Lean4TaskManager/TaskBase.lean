@@ -1,7 +1,7 @@
 import Std
 import Lean.Util.FoldConsts
 import Lean4MyLib.MyDate
-import Lean4MyLib.DAG
+import Lean4MyLib.DirectedGraph
 import Lean
 open Std
 open Std.Time
@@ -60,25 +60,25 @@ instance : ToString (TaskBase Status Tag) where
 def TaskBase.new [Inhabited Status](name:String) (tags:List Tag)  (operator:Option Operator:=none) (status:Status:= default) (links:List KnowledgeLink:=[]) («開始予定日»:Option ZonedDateTime:=none) («終了予定日»:Option ZonedDateTime:=none) («終了日»:Option ZonedDateTime:=none) (details:="") (result:="") :TaskBase Status Tag :=
   {name,status:=status, assign:=operator,tags,links, «開始予定日»,«終了予定日», «終了日», details, result}
 
-def inner_isAllChildrenValid [Doneable Status] (dag:DAG (TaskBase Status Tag)) (target:Fin dag.1) : Bool :=
+def inner_isAllChildrenValid [Doneable Status] (dag:PackedDAG (TaskBase Status Tag)) (target:Fin dag.1) : Bool :=
   match dag with
   | ⟨n, sdag⟩ =>
     if Doneable.isDone (sdag.label target).status
     then true
     else (List.finRange n).all (fun fin =>
-      let kidsAsFinN : List (Fin n) := (sdag.children fin).map (SDAG.coeChild fin) -- そのままだとtargetと比較できないから"持ち上げる"必要があるらしい。意味不明
+      let kidsAsFinN : List (Fin n) := (sdag.kids fin).map (DAG.coeChild fin) -- そのままだとtargetと比較できないから"持ち上げる"必要があるらしい。意味不明
       let hasTarget:=kidsAsFinN.contains target
       (!hasTarget || !Doneable.isDone (sdag.label fin).status)
       )
 
-def isAllChildrenValidDAG [Doneable Status] (dag:DAG (TaskBase Status Tag)):Bool :=
+def isAllChildrenValidDAG [Doneable Status] (dag:PackedDAG (TaskBase Status Tag)):Bool :=
   (List.finRange dag.1).all (fun fin=>inner_isAllChildrenValid dag fin)
 
-def printDoneLog [Doneable Status][ToJson (TaskBase Status Tag)] [Inhabited (TaskBase Status Tag)] (dag:DAG (TaskBase Status Tag)):IO Unit:=do
+def printDoneLog [Doneable Status][ToJson (TaskBase Status Tag)] [Inhabited (TaskBase Status Tag)] (dag:PackedDAG (TaskBase Status Tag)):IO Unit:=do
   let current <- now
   let filename:String := (current.toISO8601String.takeWhile  (fun x=> x != 'T')) ++ ".json"
-  let fd := DAGWithFilter.of dag (fun (t, _) =>
+  let fd :=  dag.WithFilterOf (fun (t, _) =>
     match t.«終了日» with
     | none=>Doneable.isDone t.status
     | some d=> (Doneable.isDone t.status && is_same_date current d))
-  IO.FS.writeFile filename (toJsonByLabel fd.compress).pretty
+  IO.FS.writeFile filename (toJson fd.compress).pretty
