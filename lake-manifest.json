@@ -5,7 +5,7 @@
    "type": "git",
    "subDir": null,
    "scope": "",
-   "rev": "87b0878bc3594d92482c8fff20465f58ecfdbbab",
+   "rev": "5c0e5b557e3b3d2d990b39a883af77358e00f5dc",
    "name": "Lean4MyLib",
    "manifestFile": "lake-manifest.json",
    "inputRev": "main",
