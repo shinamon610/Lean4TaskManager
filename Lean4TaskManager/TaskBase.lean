@@ -82,3 +82,35 @@ def printDoneLog [Doneable Status][ToJson (TaskBase Status Tag)] [Inhabited (Tas
     | none=>Doneable.isDone t.status
     | some d=> (Doneable.isDone t.status && is_same_date current d))
   IO.FS.writeFile filename (toJson fd.compress).pretty
+
+partial def pritnTsv (dag : PackedDAG (TaskBase Status Tag)) : IO Unit := do
+  let output :=
+    match dag with
+    | ⟨n, sdag⟩ =>
+      -- すべてのノード
+      let all : List (Fin n) := List.finRange n
+
+      -- 全ての子ノード
+      let allChildren : List (Fin n) :=
+        all.flatMap (fun i => (sdag.kids i).map (DAG.coeChild i))
+
+      -- 親を持たないノードを root とみなす
+      let roots : List (Fin n) :=
+        all.filter (fun i => ¬ allChildren.contains i)
+
+      -- 深さに応じてタブを付けて name を 1 行出力する DFS
+      let rec dfs (i : Fin n) (depth : Nat) (visited : List (Fin n)) : List String :=
+        if visited.contains i then
+          []
+        else
+          let indent := String.join (List.replicate depth "\t")
+          let line   := indent ++ "\"" ++ (sdag.label i).name ++ "\""
+          let children : List (Fin n) := (sdag.kids i).map (DAG.coeChild i)
+          let childLines :=
+            children.flatMap (fun j => dfs j (depth + 1) (i :: visited))
+          line :: childLines
+
+      let lines := roots.flatMap (fun r => dfs r 0 [])
+      String.intercalate "\n" lines
+
+  IO.println output
