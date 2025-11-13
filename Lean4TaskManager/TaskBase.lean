@@ -113,4 +113,4 @@ partial def pritnTsv (dag : PackedDAG (TaskBase Status Tag)) : IO Unit := do
       let lines := roots.flatMap (fun r => dfs r 0 [])
       String.intercalate "\n" lines
 
-  IO.println output
+  IO.FS.writeFile "task.csv" output
