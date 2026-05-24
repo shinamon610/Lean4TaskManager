@@ -76,7 +76,7 @@ def isAllChildrenValidDAG [Doneable A] (dag:PackedDAG A):Bool :=
 
 def printDoneLog [Doneable Status][ToJson (TaskBase Status Tag)] [Inhabited (TaskBase Status Tag)] (dag:PackedDAG (TaskBase Status Tag)):IO Unit:=do
   let current <- now
-  let filename:String := (current.toISO8601String.takeWhile  (fun x=> x != 'T')) ++ ".json"
+  let filename:String := (current.toISO8601String.takeWhile  (fun x=> x != 'T')).toString ++ ".json"
   let fd :=  dag.WithFilterOf (fun (t, _) =>
     match t.«終了日» with
     | none=>Doneable.isDone t.status
